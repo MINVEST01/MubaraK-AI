@@ -1,0 +1,41 @@
+fastapi
+uvicorn[standard]
+gunicorn
+sqlalchemy
+aiosqlite
+redis[hiredis]
+asyncpg
+alembic
+pydantic-settings
+
+# Для хэширования паролей
+passlib[bcrypt]
+
+# Для работы с JWT-токенами
+python-jose[cryptography]
+structlog
+
+# Для фоновых задач (отправка уведомлений)
+apscheduler
+tzdata # Для корректной работы с часовыми поясами в zoneinfo
+
+# Зависимости для OpenTelemetry
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-exporter-otlp-proto-http
+opentelemetry-instrumentation-sqlalchemy
+opentelemetry-exporter-prometheus
+
+# Для взаимодействия с Ethereum-блокчейном
+web3
+
+# Для ИИ-анализатора
+transformers
+torch
+
+# Для мокирования Redis в тестах
+fakeredis
+
+# Для управления временем в тестах
+freezegun

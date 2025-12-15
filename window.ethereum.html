@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Привязка кошелька</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
+        #link-wallet-container { border: 1px solid #ccc; padding: 2em; border-radius: 8px; text-align: center; }
+        #link-wallet-btn { font-size: 1.1em; padding: 10px 20px; cursor: pointer; }
+        #status-message { margin-top: 20px; font-weight: bold; min-height: 20px; }
+        .status-error { color: #d9534f; }
+        .status-success { color: #5cb85c; }
+        .status-info { color: #5bc0de; }
+    </style>
+</head>
+<body>
+
+    <div id="link-wallet-container">
+        <h2>Привязка Ethereum кошелька</h2>
+        <p>Подтвердите владение вашим кошельком, чтобы связать его с вашим аккаунтом.</p>
+        <button id="link-wallet-btn">Привязать кошелек</button>
+        <div id="status-message"></div>
+    </div>
+
+    <script>
+        const linkWalletBtn = document.getElementById('link-wallet-btn');
+        const statusMessage = document.getElementById('status-message');
+
+        // ВАЖНО: Этот токен должен быть получен после логина пользователя в вашем приложении.
+        // Он нужен для аутентификации запросов к вашему API.
+        const USER_AUTH_TOKEN = "your_jwt_access_token_here"; 
+
+        linkWalletBtn.addEventListener('click', handleLinkWallet);
+
+        /**
+         * Основная функция, запускающая процесс привязки кошелька.
+         */
+        async function handleLinkWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                updateStatus("Пожалуйста, установите MetaMask или другой Web3 кошелек!", "error");
+                return;
+            }
+
+            try {
+                // --- Шаг 1: Подключение к кошельку и получение адреса ---
+                updateStatus("Подключаемся к вашему кошельку...", "info");
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const walletAddress = accounts[0];
+                if (!walletAddress) {
+                    updateStatus("Не удалось получить адрес кошелька.", "error");
+                    return;
+                }
+                updateStatus(`Кошелек ${formatAddress(walletAddress)} подключен.`, "info");
+
+                // --- Шаг 2: Запрос уникального сообщения с сервера ---
+                updateStatus("Получаем сообщение для подписи...", "info");
+                const messageToSign = await getChallengeMessage();
+                if (!messageToSign) return; // Ошибка будет обработана внутри функции
+
+                // --- Шаг 3: Запрос подписи сообщения у пользователя ---
+                updateStatus("Пожалуйста, подпишите сообщение в вашем кошельке...", "info");
+                const signature = await window.ethereum.request({
+                    method: 'personal_sign',
+                    params: [messageToSign, walletAddress],
+                });
+
+                // --- Шаг 4: Отправка подписи на сервер для верификации ---
+                updateStatus("Проверяем подпись на сервере...", "info");
+                await verifySignatureOnBackend(signature, walletAddress);
+
+                updateStatus(`Кошелек ${formatAddress(walletAddress)} успешно привязан!`, "success");
+                linkWalletBtn.disabled = true;
+                linkWalletBtn.textContent = "Кошелек привязан";
+
+            } catch (error) {
+                // Обработка ошибок от MetaMask (например, пользователь отклонил подпись)
+                console.error("Ошибка в процессе привязки:", error);
+                updateStatus(error.message || "Действие было отклонено.", "error");
+            }
+        }
+
+        /**
+         * Запрашивает у бэкенда сообщение для подписи.
+         */
+        async function getChallengeMessage() {
+            try {
+                const response = await fetch('/api/v1/users/me/link-wallet-message', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${USER_AUTH_TOKEN}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Ошибка сервера: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.message;
+            } catch (error) {
+                console.error("Ошибка при получении сообщения:", error);
+                updateStatus(error.message, "error");
+                return null;
+            }
+        }
+
+        /**
+         * Отправляет подпись и адрес на бэкенд для финальной проверки.
+         */
+        async function verifySignatureOnBackend(signature, walletAddress) {
+            try {
+                const response = await fetch('/api/v1/users/me/link-wallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${USER_AUTH_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        signature: signature,
+                        wallet_address: walletAddress
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Ошибка сервера: ${response.status}`);
+                }
+
+                const updatedUser = await response.json();
+                console.log("Профиль пользователя обновлен:", updatedUser);
+
+            } catch (error) {
+                console.error("Ошибка при верификации подписи:", error);
+                // Перебрасываем ошибку, чтобы она была поймана в `handleLinkWallet`
+                throw error;
+            }
+        }
+
+        /**
+         * Вспомогательная функция для обновления статусного сообщения.
+         */
+        function updateStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-${type}`;
+        }
+        
+        /**
+         * Вспомогательная функция для красивого отображения адреса.
+         */
+        function formatAddress(address) {
+            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        }
+
+    </script>
+</body>
+</html>

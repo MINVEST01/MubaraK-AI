@@ -1,0 +1,21 @@
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-family-headings);
+  color: var(--color-primary);
+}
+
+.button-primary {
+  background-color: var(--color-accent);
+  color: var(--color-text-primary);
+  /* ... другие стили */
+}
+
+.card {
+  background-color: var(--color-surface);
+  /* ... другие стили */
+}

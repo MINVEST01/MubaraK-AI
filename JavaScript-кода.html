@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Страница Вакф-Проекта</title>
+    <style>
+        body { font-family: sans-serif; padding: 2em; }
+        #status { font-style: italic; color: #555; }
+        #events-log { border: 1px solid #ccc; padding: 10px; margin-top: 20px; height: 200px; overflow-y: scroll; background: #f9f9f9; }
+        .event-item { padding: 5px; border-bottom: 1px solid #eee; }
+        .event-item.donation { color: green; }
+    </style>
+</head>
+<body>
+
+    <h1>Проект "Строительство колодца" (ID: 1)</h1>
+    <p><strong>Собрано:</strong> <span id="raised-amount">10.5</span> ETH</p>
+    <p><strong>Статус соединения:</strong> <span id="status">Подключение...</span></p>
+
+    <h2>Журнал событий в реальном времени:</h2>
+    <div id="events-log">
+        <!-- Сюда будут добавляться новые события -->
+    </div>
+
+    <script>
+        // --- НАСТРОЙКИ ---
+        const WAQF_PROJECT_ID = 1; // ID проекта, который мы отслеживаем
+        // URL вашего WebSocket-сервера
+        const WEBSOCKET_URL = `ws://localhost:8000/api/v1/waqf/${WAQF_PROJECT_ID}/subscribe`;
+
+        // --- ЭЛЕМЕНТЫ DOM ---
+        const statusElement = document.getElementById('status');
+        const eventsLogElement = document.getElementById('events-log');
+        const raisedAmountElement = document.getElementById('raised-amount');
+
+        // --- ЛОГИКА WEBSOCKET ---
+
+        // 1. Создаем новый экземпляр WebSocket
+        const socket = new WebSocket(WEBSOCKET_URL);
+
+        // 2. Обработчик события: соединение установлено
+        socket.onopen = function(event) {
+            console.log("WebSocket соединение успешно установлено.");
+            statusElement.textContent = "Подключено";
+            statusElement.style.color = "green";
+            addLogMessage("Подписка на события проекта активна.", "info");
+        };
+
+        // 3. Обработчик события: получено новое сообщение от сервера
+        socket.onmessage = function(event) {
+            console.log("Получено сообщение от сервера:", event.data);
+            
+            try {
+                const data = JSON.parse(event.data);
+
+                // Обрабатываем событие в зависимости от его типа
+                if (data.event === 'DonationReceived') {
+                    handleDonationEvent(data);
+                } else {
+                    // Обработка других типов событий
+                    addLogMessage(`Получено неизвестное событие: ${data.event}`, "info");
+                }
+
+            } catch (error) {
+                console.error("Ошибка парсинга JSON:", error);
+                addLogMessage("Получены некорректные данные от сервера.", "error");
+            }
+        };
+
+        // 4. Обработчик события: произошла ошибка
+        socket.onerror = function(error) {
+            console.error("Ошибка WebSocket:", error);
+            statusElement.textContent = "Ошибка соединения";
+            statusElement.style.color = "red";
+        };
+
+        // 5. Обработчик события: соединение закрыто
+        socket.onclose = function(event) {
+            console.log("WebSocket соединение закрыто:", event);
+            statusElement.textContent = "Отключено";
+            statusElement.style.color = "gray";
+            if (event.wasClean) {
+                addLogMessage(`Соединение закрыто чисто, код=${event.code}, причина=${event.reason}`, "info");
+            } else {
+                // Например, сервер перестал работать
+                addLogMessage('Соединение оборвалось. Попытка переподключения через 5 секунд...', "error");
+                // Здесь можно реализовать логику переподключения
+                // setTimeout(connect, 5000);
+            }
+        };
+
+        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+
+        /**
+         * Обрабатывает событие нового пожертвования и обновляет UI.
+         */
+        function handleDonationEvent(data) {
+            const donorAddress = data.donor;
+            const amountEth = parseFloat(data.amount_eth).toFixed(4);
+
+            // Обновляем общую собранную сумму
+            const currentRaised = parseFloat(raisedAmountElement.textContent);
+            const newRaised = currentRaised + parseFloat(data.amount_eth);
+            raisedAmountElement.textContent = newRaised.toFixed(4);
+
+            // Добавляем запись в лог
+            const message = `✅ Новое пожертвование: <b>${amountEth} ETH</b> от ${donorAddress.substring(0, 6)}...${donorAddress.substring(donorAddress.length - 4)}`;
+            addLogMessage(message, "donation");
+        }
+
+        /**
+         * Добавляет сообщение в журнал событий на странице.
+         */
+        function addLogMessage(message, type) {
+            const logItem = document.createElement('div');
+            logItem.className = `event-item ${type}`;
+            logItem.innerHTML = message; // Используем innerHTML, чтобы рендерить теги <b>
+            eventsLogElement.appendChild(logItem);
+            // Автоматически прокручиваем лог вниз
+            eventsLogElement.scrollTop = eventsLogElement.scrollHeight;
+        }
+
+    </script>
+</body>
+</html>

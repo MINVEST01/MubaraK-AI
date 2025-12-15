@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя | MubaraK-AI</title>
+
+    <!-- 1. Подключаем шрифты с Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- 2. Определяем стили и CSS-переменные -->
+    <style>
+        :root {
+            /* Шрифты */
+            --font-family-headings: 'Amiri', serif;
+            --font-family-body: 'Inter', sans-serif;
+
+            /* Светлая Тема */
+            --color-primary: #408E91;
+            --color-accent: #D4AF37;
+            --color-background: #FDF8F0;
+            --color-surface: #FFFFFF;
+            --color-text-primary: #2C3E50;
+            --color-text-secondary: #596A7A;
+            --color-border: #EAEAEA;
+        }
+
+        [data-theme='dark'] {
+            /* Темная Тема */
+            --color-primary: #4CB0B3;
+            --color-accent: #D4AF37;
+            --color-background: #1B262C;
+            --color-surface: #2C3E50;
+            --color-text-primary: #F0F5F9;
+            --color-text-secondary: #A8B2BA;
+            --color-border: #3A4A5B;
+        }
+
+        /* Общие стили */
+        body {
+            margin: 0;
+            padding: 2rem;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            font-family: var(--font-family-body);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            gap: 2rem;
+        }
+
+        /* Заголовки */
+        h1, h2, h3 {
+            font-family: var(--font-family-headings);
+            color: var(--color-primary);
+            font-weight: 700;
+            margin-top: 0;
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+
+        /* Шапка профиля */
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .baraka-points {
+            background-color: var(--color-accent);
+            color: var(--color-text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        /* Карточки */
+        .profile-card {
+            background-color: var(--color-surface);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s;
+        }
+
+        /* Таблица */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        th {
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        /* Кнопка */
+        .button {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--color-primary);
+            color: #FFFFFF;
+            font-family: var(--font-family-body);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="profile-header">
+            <h1>Ахмед Аль-Мисри</h1>
+            <div class="baraka-points">⭐ 1500 Барака Поинтов</div>
+        </header>
+
+        <main>
+            <section class="profile-card">
+                <h2>Духовный профиль</h2>
+                <p>Анализ ваших обращений показывает, что вас больше всего волнует тема <strong>'Терпение'</strong>. Вы также часто размышляете о темах: 'Надежда', 'Благодарность'.</p>
+                
+                <h3>Ключевые темы:</h3>
+                <ul>
+                    <li>Терпение (60%)</li>
+                    <li>Надежда (25%)</li>
+                    <li>Благодарность (15%)</li>
+                </ul>
+            </section>
+
+            <section class="profile-card">
+                <h2>Динамика интересов (последние 6 месяцев)</h2>
+                <div style="background: #eee; height: 150px; display:flex; align-items:center; justify-content:center; color: #999; border-radius: 8px;">
+                    [ Здесь будет график динамики ]
+                </div>
+            </section>
+
+            <section class="profile-card">
+                <h2>История пожертвований</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Вакф</th>
+                            <th>Сумма</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Пожертвование на колодец</td>
+                            <td>1000 поинтов</td>
+                            <td>14.12.2025</td>
+                        </tr>
+                        <tr>
+                            <td>Поддержка студентов</td>
+                            <td>250 поинтов</td>
+                            <td>05.11.2025</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="profile-card">
+                <h2>Настройки</h2>
+                <p>Переключить цветовую схему оформления.</p>
+                <button class="button" id="theme-switcher">Переключить на темную тему</button>
+            </section>
+        </main>
+    </div>
+
+    <!-- 3. Простой JavaScript для переключения темы -->
+    <script>
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const body = document.body;
+
+        themeSwitcher.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                body.removeAttribute('data-theme');
+                themeSwitcher.textContent = 'Переключить на темную тему';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeSwitcher.textContent = 'Переключить на светлую тему';
+            }
+        });
+    </script>
+
+</body>
+</html>

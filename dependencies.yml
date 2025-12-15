@@ -1,0 +1,8 @@
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Добавьте эту строку
+  http: ^1.2.1 # Используйте последнюю версию
+
+  cupertino_icons: ^1.0.2

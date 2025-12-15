@@ -1,0 +1,35 @@
+# subgraph.yaml
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+- kind: ethereum
+  name: WaqfProject
+  network: sepolia # Укажите вашу сеть
+  source:
+    # Адрес вашего развернутого контракта WaqfProject
+    address: "0x...YOUR_WAQF_PROJECT_CONTRACT_ADDRESS..."
+    # ABI контракта
+    abi: WaqfProject
+    # Номер блока, в котором был создан контракт. Это ускорит индексацию.
+    startBlock: 5000000
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.7
+    language: wasm/assemblyscript
+    entities:
+    - Project
+    - Milestone
+    - Donor
+    - Contribution
+    abis:
+    - name: WaqfProject
+      file: ./abis/WaqfProject.json # Путь к файлу с ABI вашего контракта
+    eventHandlers:
+    # Обработчик для события пожертвования
+    - event: DonationReceived(indexed address,uint256)
+      handler: handleDonationReceived
+    # Обработчик для события выплаты по этапу
+    - event: MilestonePaid(indexed uint256,uint256)
+      handler: handleMilestonePaid
+    file: ./src/mapping.ts # Путь к файлу с логикой
